@@ -16,6 +16,8 @@ TG_BOT_TOKEN = getConfig("tgbot", "TG_BOT_TOKEN")
 TG_ADMIN = getConfig("tgbot", "TG_ADMIN")
 GH_API_URL = getConfig("ci", "GH_API_URL")
 GH_TOKEN = getConfig("ci", "GH_TOKEN")
+HEROKU_APP_NAME = getConfig("heroku", "HEROKU_APP_NAME")
+HEROKU_DEFAULT_PORT = int(os.environ.get("PORT", getConfig("heroku", "HEROKU_DEFAULT_PORT")))
 
 # Check for unauthorized user
 def restricted(func):
@@ -66,7 +68,10 @@ def main():
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("fw_dump", fw_dump, run_async=True))
-    updater.start_polling()
+    updater.start_webhook(listen="0.0.0.0",
+                          port=int(HEROKU_DEFAULT_PORT),
+                          url_path=TG_BOT_TOKEN)
+    updater.bot.setWebhook("https://{}.herokuapp.com/".format(HEROKU_APP_NAME) + TG_BOT_TOKEN)
     updater.idle()
 
 if __name__ == '__main__':
